@@ -10,12 +10,14 @@ const URL =
 
 const AppRoutes = () => {
   const [students, setStudents] = useState([]);
+  const [editedStudents, setEditedStudents] = useState([]);
 
   const getStudents = async () => {
     try {
       const response = await fetch(URL);
       const data = await response.json();
       setStudents(data);
+      setEditedStudents(data);
     } catch (error) {
       console.log(error);
     }
@@ -68,8 +70,19 @@ const AppRoutes = () => {
     }
   };
 
- const  onSubmitEdited = (updatedStudent) => {
-    editStudent(updatedStudent);
+  const getStudentById = async (id) => {
+    try {
+      const response = await fetch(`${URL}/${id}`);
+      const studentData = await response.json();
+      return studentData;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
+
+  const onSubmitEdited = (id, updatedStudent) => {
+    editStudent(id, updatedStudent);
   };
 
   const onSubmit = (student) => {
@@ -92,11 +105,15 @@ const AppRoutes = () => {
       element: <EditStudents />,
     },
     {
-        path: "/edit/:id",
-        element: <EditingStudent onSubmitEdited={onSubmitEdited} students={students} />,
-      },
+      path: "/edit/:id",
+      element: (
+        <EditingStudent
+          getStudentById={getStudentById}
+          onSubmitEdited={onSubmitEdited}
+        />
+      ),
+    },
   ]);
-
 
   return <RouterProvider router={routes} />;
 };

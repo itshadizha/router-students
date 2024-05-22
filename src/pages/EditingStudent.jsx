@@ -1,53 +1,53 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-const EditingStudent = ({ students, onSubmitEdited }) => {
-
+const EditingStudent = ({ getStudentById, onSubmitEdited }) => {
+  const navigate = useNavigate()
   const { id } = useParams();
-  const numericId = Number(id);
-  const student = students.find((student) => student._id === numericId);
 
-  const [editName, setEditName] = useState(student ? student.name : "");
-  const [editSurname, setEditSurname] = useState(
-    student ? student.surname : ""
-  );
-  const [editGender, setEditGender] = useState(student ? student.gender : "");
-  const [editCity, setEditCity] = useState(student ? student.city : "");
+  const [editName, setEditName] = useState("");
+  const [editSurname, setEditSurname] = useState("");
+  const [editGender, setEditGender] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [student, setStudent] = useState(null);
 
-  // useEffect(() => {
-  //   if (student) {
-  //     setEditName(student.name);
-  //     setEditSurname(student.surname);
-  //     setEditGender(student.gender);
-  //     setEditCity(student.city);
-  //   }
-  // }, [student]);
+  useEffect(() => {
+    const fetchStudent = async () => {
+      const studentData = await getStudentById(id);
+      setStudent(studentData);
+      setEditName(studentData.name);
+      setEditSurname(studentData.surname);
+      setEditGender(studentData.gender);
+      setEditCity(studentData.city);
+    };
 
-
+    fetchStudent();
+  }, [id, getStudentById]);
 
   const submitEditedHandler = (e) => {
     e.preventDefault();
     const updatedStudent = {
+      id,
       name: editName,
       surname: editSurname,
       gender: editGender,
       city: editCity,
     };
-    onSubmitEdited(updatedStudent);
+    onSubmitEdited(id, updatedStudent);
+    navigate("/")
   };
 
   if (!student) {
     return <div>Student not found</div>;
   }
-  console.log(students)
 
   return (
     <Wrapper>
       <StyledForm onSubmit={submitEditedHandler}>
         <Container>
           <label htmlFor="name">Name</label>
-          <StyledF
+          <StyledInput
             onChange={(e) => setEditName(e.target.value)}
             value={editName}
             type="text"
@@ -57,7 +57,7 @@ const EditingStudent = ({ students, onSubmitEdited }) => {
 
         <Container>
           <label htmlFor="surname">Surname</label>
-          <StyledF
+          <StyledInput
             onChange={(e) => setEditSurname(e.target.value)}
             value={editSurname}
             type="text"
@@ -126,9 +126,10 @@ const Button = styled.button`
   background-color: yellow;
   border: none;
   border-radius: 8px;
+  cursor: pointer;
 `;
 
-const StyledF = styled.input`
+const StyledInput = styled.input`
   padding: 5px;
 `;
 
